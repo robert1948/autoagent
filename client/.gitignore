@@ -1,23 +1,44 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Node.js (React)
 /node_modules
 /.pnp
 .pnp.js
-
-# testing
 /coverage
-
-# production
 /build
-
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Python (FastAPI)
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+venv/
+.env
+.env.*
+
+# IDEs and editors
+.DS_Store
+.vscode/
+.idea/
+
+# VS Code DevContainer
+.devcontainer/
+
+# Heroku
+*.log
+*.sqlite3
+
+# Docker
+*.pid
+*.tar
+*.bak
+*.swp
+docker-compose.override.yml
+
+# GitHub Codespaces
+/.codespaces/
+
+# OS
+Thumbs.db
+ehthumbs.db
