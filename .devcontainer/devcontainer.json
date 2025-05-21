@@ -1,0 +1,25 @@
+{
+  "name": "AutoAgent Dev Container",
+  "context": "..",
+  "dockerFile": "../Dockerfile",
+  "forwardPorts": [8000, 3000],
+  "postCreateCommand": "pip install -r requirements.txt && npm install --prefix client",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": { "version": "3.10" },
+    "ghcr.io/devcontainers/features/node:1": { "version": "20" }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.pythonPath": "/usr/local/bin/python",
+        "editor.formatOnSave": true
+      },
+      "extensions": [
+        "ms-python.python",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  }
+}

@@ -1,13 +1,10 @@
-from fastapi import FastAPI
-from agent import run_agent
+from fastapi import APIRouter
+from routes.developer import router as developer_router
+from routes.user import router as user_router  # 👈 Add this
 
-app = FastAPI()
+router = APIRouter()
 
-@app.get("/")
-def read_root():
-    return {"message": "Autoagent backend is live"}
-
-@app.get("/run-agent")
-def trigger_agent():
-    run_agent()
-    return {"status": "Agent triggered"}
+router.include_router(
+    developer_router, prefix="/developer", tags=["Developer"])
+router.include_router(user_router, prefix="/user",
+                      tags=["User"])  # 👈 Register user routes

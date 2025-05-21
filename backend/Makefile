@@ -6,7 +6,7 @@ install:
 	pip install -e .[dev]
 
 run:
-	autoagent
+	uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 
 test:
 	pytest tests
