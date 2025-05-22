@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Import the central API router using full module path for Heroku compatibility
+# Route and DB imports
 from backend.src.api import router as api_router
+from backend.src.database import engine
+from backend.src.models import Base
 
 app = FastAPI(
     title="AutoAgent API",
@@ -10,20 +12,27 @@ app = FastAPI(
     description="Backend for AutoAgent with user and developer registration"
 )
 
-# CORS settings — use specific origin in production
+# Enable CORS for dev (lock down in production)
 app.add_middleware(
     CORSMiddleware,
-    # Replace with ["https://your-frontend.com"] in production
-    allow_origins=["*"],
+    allow_origins=["*"],  # ✅ TODO: restrict in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include all routes under /api prefix
+# Automatically create tables on startup
+
+
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
+
+
+# Include API routes
 app.include_router(api_router, prefix="/api")
 
-# Root route for health check
+# Health check
 
 
 @app.get("/")
