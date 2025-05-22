@@ -1,10 +1,21 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel, EmailStr
-from backend.src.utils import hash_password  # ✅ import the utility
+from sqlalchemy.orm import Session
+from backend.src.utils import hash_password
+from backend.src.database import SessionLocal
+from backend.src.models import User
 
 router = APIRouter()
 
-user_db = []  # Simulated DB
+# Dependency to get a DB session
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 class UserRegisterRequest(BaseModel):
@@ -15,24 +26,32 @@ class UserRegisterRequest(BaseModel):
 
 
 @router.post("/register-user")
-def register_user(data: UserRegisterRequest):
-    # Check if email or username already exists
-    for user in user_db:
-        if user['email'] == data.email:
-            raise HTTPException(status_code=400, detail="Email already exists")
-        if user['username'] == data.username:
-            raise HTTPException(
-                status_code=400, detail="Username already exists")
+def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
+    # Check for duplicate email or username
+    existing_user = db.query(User).filter(
+        (User.email == data.email) | (User.username == data.username)
+    ).first()
 
-    # ✅ Hash the password
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email or username already exists"
+        )
+
+    # Hash the password
     hashed_pw = hash_password(data.password)
 
-    user_db.append({
-        "fullName": data.fullName,
-        "username": data.username,
-        "email": data.email,
-        "password": hashed_pw,
-        "verified": False,
-    })
+    # Create and store user
+    new_user = User(
+        full_name=data.fullName,
+        username=data.username,
+        email=data.email,
+        password=hashed_pw,
+        verified=False,
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
 
     return {"success": True, "message": "User registered. Please verify your email."}
