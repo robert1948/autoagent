@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
-from backend.src.utils import hash_password
+from backend.src.utils import hash_password, verify_password
 from backend.src.database import SessionLocal
 from backend.src.models import User
 
@@ -17,6 +17,8 @@ def get_db():
     finally:
         db.close()
 
+# ----- REGISTER -----
+
 
 class UserRegisterRequest(BaseModel):
     fullName: str
@@ -27,7 +29,6 @@ class UserRegisterRequest(BaseModel):
 
 @router.post("/register-user")
 def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
-    # Check for duplicate email or username
     existing_user = db.query(User).filter(
         (User.email == data.email) | (User.username == data.username)
     ).first()
@@ -38,10 +39,8 @@ def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
             detail="Email or username already exists"
         )
 
-    # Hash the password
     hashed_pw = hash_password(data.password)
 
-    # Create and store user
     new_user = User(
         full_name=data.fullName,
         username=data.username,
@@ -55,3 +54,25 @@ def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     return {"success": True, "message": "User registered. Please verify your email."}
+
+# ----- LOGIN -----
+
+
+class LoginRequest(BaseModel):
+    identifier: str  # email or username
+    password: str
+
+
+@router.post("/login")
+def login_user(data: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(
+        (User.email == data.identifier) | (User.username == data.identifier)
+    ).first()
+
+    if not user or not verify_password(data.password, user.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email/username or password"
+        )
+
+    return {"success": True, "message": f"Welcome back, {user.full_name}!"}
