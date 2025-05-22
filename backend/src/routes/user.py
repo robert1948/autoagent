@@ -1,12 +1,10 @@
-# backend/src/routes/user.py
-
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr
+from backend.src.utils import hash_password  # ✅ import the utility
 
 router = APIRouter()
 
-# In-memory storage (replace with DB later)
-user_db = []
+user_db = []  # Simulated DB
 
 
 class UserRegisterRequest(BaseModel):
@@ -18,7 +16,7 @@ class UserRegisterRequest(BaseModel):
 
 @router.post("/register-user")
 def register_user(data: UserRegisterRequest):
-    # Check for duplicate email or username
+    # Check if email or username already exists
     for user in user_db:
         if user['email'] == data.email:
             raise HTTPException(status_code=400, detail="Email already exists")
@@ -26,12 +24,14 @@ def register_user(data: UserRegisterRequest):
             raise HTTPException(
                 status_code=400, detail="Username already exists")
 
-    # Store user (password should be hashed in production)
+    # ✅ Hash the password
+    hashed_pw = hash_password(data.password)
+
     user_db.append({
         "fullName": data.fullName,
         "username": data.username,
         "email": data.email,
-        "password": data.password,
+        "password": hashed_pw,
         "verified": False,
     })
 
