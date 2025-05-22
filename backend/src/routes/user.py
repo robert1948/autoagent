@@ -4,10 +4,12 @@ from sqlalchemy.orm import Session
 from backend.src.utils import hash_password, verify_password
 from backend.src.database import SessionLocal
 from backend.src.models import User
+from backend.src.auth import create_access_token
+from backend.src.dependencies.auth_guard import get_current_user  # ✅ Auth dependency
 
 router = APIRouter()
 
-# Dependency to get a DB session
+# ----- DB Dependency -----
 
 
 def get_db():
@@ -75,4 +77,22 @@ def login_user(data: LoginRequest, db: Session = Depends(get_db)):
             detail="Invalid email/username or password"
         )
 
-    return {"success": True, "message": f"Welcome back, {user.full_name}!"}
+    token = create_access_token({"sub": user.email})
+
+    return {
+        "success": True,
+        "token": token,
+        "message": f"Welcome back, {user.full_name}!"
+    }
+
+# ----- PROFILE (/me) -----
+
+
+@router.get("/me")
+def get_profile(current_user: User = Depends(get_current_user)):
+    return {
+        "fullName": current_user.full_name,
+        "username": current_user.username,
+        "email": current_user.email,
+        "verified": current_user.verified
+    }
