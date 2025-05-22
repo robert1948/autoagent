@@ -6,14 +6,17 @@ from backend.src.database import SessionLocal
 from backend.src.models import User
 import os
 
-# OAuth2 scheme (expects Authorization: Bearer <token>)
+# OAuth2 scheme — expects: Authorization: Bearer <token>
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/login")
 
-# Get secret and algorithm from environment or fallback
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key")  # Set in Heroku config
+# Load JWT config from environment
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
-# DB Dependency
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY is not set in environment variables")
+
+# ----- DB Dependency -----
 
 
 def get_db():
@@ -23,10 +26,13 @@ def get_db():
     finally:
         db.close()
 
-# Get current user based on token
+# ----- Authenticated User Resolver -----
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials.",
@@ -36,13 +42,13 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
-        if not email:
+        if email is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
 
     user = db.query(User).filter(User.email == email).first()
-    if not user:
+    if user is None:
         raise credentials_exception
 
     return user
