@@ -5,7 +5,7 @@ from backend.src.utils import hash_password, verify_password
 from backend.src.database import SessionLocal
 from backend.src.models import User
 from backend.src.auth import create_access_token
-from backend.src.dependencies.auth_guard import get_current_user  # ✅ Auth dependency
+from backend.src.dependencies.auth_guard import get_current_user
 
 router = APIRouter()
 
@@ -19,7 +19,7 @@ def get_db():
     finally:
         db.close()
 
-# ----- REGISTER -----
+# ----- REQUEST MODELS -----
 
 
 class UserRegisterRequest(BaseModel):
@@ -29,7 +29,34 @@ class UserRegisterRequest(BaseModel):
     password: str
 
 
-@router.post("/register-user")
+class LoginRequest(BaseModel):
+    identifier: str  # email or username
+    password: str
+
+# ----- RESPONSE MODELS -----
+
+
+class UserProfile(BaseModel):
+    fullName: str
+    username: str
+    email: EmailStr
+    verified: bool
+
+
+class LoginResponse(BaseModel):
+    success: bool
+    token: str
+    message: str
+
+
+class SuccessMessage(BaseModel):
+    success: bool
+    message: str
+
+# ----- REGISTER -----
+
+
+@router.post("/register-user", response_model=SuccessMessage)
 def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(
         (User.email == data.email) | (User.username == data.username)
@@ -60,12 +87,7 @@ def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
 # ----- LOGIN -----
 
 
-class LoginRequest(BaseModel):
-    identifier: str  # email or username
-    password: str
-
-
-@router.post("/login")
+@router.post("/login", response_model=LoginResponse)
 def login_user(data: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(
         (User.email == data.identifier) | (User.username == data.identifier)
@@ -88,7 +110,7 @@ def login_user(data: LoginRequest, db: Session = Depends(get_db)):
 # ----- PROFILE (/me) -----
 
 
-@router.get("/me")
+@router.get("/me", response_model=UserProfile)
 def get_profile(current_user: User = Depends(get_current_user)):
     return {
         "fullName": current_user.full_name,
