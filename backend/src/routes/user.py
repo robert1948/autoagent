@@ -30,7 +30,7 @@ class UserRegisterRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    identifier: str  # email or username
+    identifier: str
     password: str
 
 # ----- RESPONSE MODELS -----
@@ -62,7 +62,7 @@ class SuccessMessage(BaseModel):
 @router.post("/register-user", response_model=SuccessMessage, response_model_exclude_none=True)
 def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
     """
-    Register a new user with hashed password and email uniqueness check.
+    Register a new user with hashed password and email/username uniqueness check.
     """
     existing_user = db.query(User).filter(
         (User.email == data.email) | (User.username == data.username)
@@ -75,7 +75,6 @@ def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
         )
 
     hashed_pw = hash_password(data.password)
-
     new_user = User(
         full_name=data.fullName,
         username=data.username,
@@ -109,7 +108,6 @@ def login_user(data: LoginRequest, db: Session = Depends(get_db)):
         )
 
     token = create_access_token({"sub": user.email})
-
     return {
         "success": True,
         "token": token,
@@ -130,7 +128,8 @@ def get_profile(current_user: User = Depends(get_current_user)):
         "email": current_user.email,
         "verified": current_user.verified
     }
-# ------ DEBUG ROUTE ------
+
+# ----- DEBUG USERS -----
 
 
 @router.get("/debug/users")
