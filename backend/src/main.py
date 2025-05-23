@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
-from fastapi.security import OAuth2PasswordBearer
 from backend.src.api import router as api_router
 from backend.src.database import engine
 from backend.src.models import Base
@@ -26,22 +25,26 @@ app.add_middleware(
 )
 
 # --- TABLE CREATION ---
+
+
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
+
 
 # --- ROUTES ---
 app.include_router(api_router, prefix="/api")
 
 # --- HEALTH CHECK ---
+
+
 @app.get("/")
 def read_root():
     return {"message": "AutoAgent backend is running"}
 
-# --- OAUTH2 SCHEME ---
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/login")
+# --- CUSTOM OPENAPI WITH PREFILLED JWT FOR SWAGGER ---
 
-# --- CUSTOM OPENAPI WITH DEV TOKEN ---
+
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
@@ -53,14 +56,15 @@ def custom_openapi():
         routes=app.routes,
     )
 
+    # Get token from env and show it directly in Swagger UI
     dev_token = os.getenv("DEV_JWT", "Bearer YOUR_DEV_JWT_HERE")
 
     openapi_schema["components"]["securitySchemes"] = {
         "BearerAuth": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT",
-            "description": f"**Authorization header**: `Bearer <token>`\n\n**Dev Token:**\n\n`{dev_token}`"
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization",
+            "description": f"Paste the token below:\n\n`{dev_token}`"
         }
     }
 
@@ -71,5 +75,6 @@ def custom_openapi():
 
     app.openapi_schema = openapi_schema
     return app.openapi_schema
+
 
 app.openapi = custom_openapi
