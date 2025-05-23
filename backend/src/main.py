@@ -26,30 +26,22 @@ app.add_middleware(
 )
 
 # --- TABLE CREATION ---
-
-
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
-
 
 # --- ROUTES ---
 app.include_router(api_router, prefix="/api")
 
 # --- HEALTH CHECK ---
-
-
 @app.get("/")
 def read_root():
     return {"message": "AutoAgent backend is running"}
-
 
 # --- OAUTH2 SCHEME ---
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/login")
 
 # --- CUSTOM OPENAPI WITH DEV TOKEN ---
-
-
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
@@ -79,6 +71,5 @@ def custom_openapi():
 
     app.openapi_schema = openapi_schema
     return app.openapi_schema
-
 
 app.openapi = custom_openapi
