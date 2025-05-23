@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 from backend.src.utils import hash_password, verify_password
 from backend.src.database import SessionLocal
@@ -37,10 +37,13 @@ class LoginRequest(BaseModel):
 
 
 class UserProfile(BaseModel):
-    fullName: str
+    fullName: str = Field(..., alias="full_name")
     username: str
     email: EmailStr
     verified: bool
+
+    class Config:
+        allow_population_by_field_name = True
 
 
 class LoginResponse(BaseModel):
@@ -56,8 +59,11 @@ class SuccessMessage(BaseModel):
 # ----- REGISTER -----
 
 
-@router.post("/register-user", response_model=SuccessMessage)
+@router.post("/register-user", response_model=SuccessMessage, response_model_exclude_none=True)
 def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
+    """
+    Register a new user with hashed password and email uniqueness check.
+    """
     existing_user = db.query(User).filter(
         (User.email == data.email) | (User.username == data.username)
     ).first()
@@ -87,8 +93,11 @@ def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
 # ----- LOGIN -----
 
 
-@router.post("/login", response_model=LoginResponse)
+@router.post("/login", response_model=LoginResponse, response_model_exclude_none=True)
 def login_user(data: LoginRequest, db: Session = Depends(get_db)):
+    """
+    Authenticate user using email or username and return JWT token.
+    """
     user = db.query(User).filter(
         (User.email == data.identifier) | (User.username == data.identifier)
     ).first()
@@ -110,11 +119,35 @@ def login_user(data: LoginRequest, db: Session = Depends(get_db)):
 # ----- PROFILE (/me) -----
 
 
-@router.get("/me", response_model=UserProfile)
+@router.get("/me", response_model=UserProfile, response_model_exclude_none=True)
 def get_profile(current_user: User = Depends(get_current_user)):
+    """
+    Retrieve authenticated user's profile.
+    """
     return {
-        "fullName": current_user.full_name,
+        "full_name": current_user.full_name,
         "username": current_user.username,
         "email": current_user.email,
         "verified": current_user.verified
     }
+# ------ DEBUG ROUTE ------
+
+
+@router.get("/debug/users")
+def debug_users(db: Session = Depends(get_db)):
+    """
+    ⚠️ TEMPORARY DEBUG ENDPOINT
+    Lists all users in the database.
+    REMOVE after debugging to prevent sensitive data exposure.
+    """
+    users = db.query(User).all()
+    return [
+        {
+            "id": user.id,
+            "full_name": user.full_name,
+            "username": user.username,
+            "email": user.email,
+            "verified": user.verified
+        }
+        for user in users
+    ]
