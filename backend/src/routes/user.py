@@ -1,10 +1,32 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status, Depends
+from sqlalchemy.orm import Session
+from backend.src.database import SessionLocal
+from backend.src.models import User
+from backend.src.schemas.user import UserRegisterRequest, SuccessMessage
 
 router = APIRouter()
 
-# Add your endpoints here
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
-@router.get("/users")
-def get_users():
-    return {"message": "User route is working"}
+@router.post("/register-user", response_model=SuccessMessage, status_code=status.HTTP_201_CREATED)
+def register_user(payload: UserRegisterRequest, db: Session = Depends(get_db)):
+    if db.query(User).filter(User.email == payload.email).first():
+        raise HTTPException(
+            status_code=400, detail="User with this email already exists")
+    new_user = User(
+        full_name=payload.fullName,
+        username=payload.username,
+        email=payload.email,
+        password=payload.password  # In production, hash the password!
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return {"success": True, "message": "User registration successful"}
