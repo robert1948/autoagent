@@ -2,21 +2,12 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
+
 from backend.src.database import SessionLocal
-from backend.src.models import User
-import os
+from backend.src.models import User, Developer
+from backend.src.config.settings import settings
 
-# OAuth2 scheme — expects: Authorization: Bearer <token>
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/login")
-
-# Load JWT config from environment
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
-
-if not SECRET_KEY:
-    raise RuntimeError("SECRET_KEY is not set in environment variables")
-
-# ----- DB Dependency -----
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
 
 
 def get_db():
@@ -26,31 +17,35 @@ def get_db():
     finally:
         db.close()
 
-# ----- Authenticated User Resolver -----
 
-
-def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
-) -> User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid credentials.",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     try:
-        # Decode JWT
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email = payload.get("sub")
-        if not email:
-            raise credentials_exception
+        payload = jwt.decode(token, settings.SECRET_KEY,
+                             algorithms=[settings.ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        user = db.query(User).filter(User.email == email).first()
+        if user is None:
+            raise HTTPException(status_code=401, detail="User not found")
+        return user
     except JWTError:
-        raise credentials_exception
+        raise HTTPException(
+            status_code=401, detail="Could not validate credentials")
 
-    # Lookup user
-    user = db.query(User).filter(User.email == email).first()
-    if not user:
-        raise credentials_exception
 
-    return user
+def get_current_developer(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> Developer:
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY,
+                             algorithms=[settings.ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        developer = db.query(Developer).filter(
+            Developer.email == email).first()
+        if developer is None:
+            raise HTTPException(status_code=401, detail="Developer not found")
+        return developer
+    except JWTError:
+        raise HTTPException(
+            status_code=401, detail="Could not validate credentials")

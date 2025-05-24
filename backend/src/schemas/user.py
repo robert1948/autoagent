@@ -1,3 +1,5 @@
+# backend/src/schemas/user.py
+
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -20,8 +22,8 @@ class UserProfile(BaseModel):
     verified: bool
 
     class Config:
-        allow_population_by_field_name = True
-        orm_mode = True
+        populate_by_name = True  # Updated for Pydantic v2
+        from_attributes = True
 
 
 class LoginResponse(BaseModel):

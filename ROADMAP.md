@@ -16,14 +16,14 @@
 ## ✅ Milestone 2: Authentication & Security
 
 - [x] Implement password hashing using `bcrypt`
-- [ ] Add `POST /login` endpoints for developers and users
-- [ ] Generate JWT tokens upon successful login
-- [ ] Protect `/me` routes with `Depends(auth_guard)`
-- [ ] Extend Swagger auth to use real JWT bearer token
+- [x] Add `POST /login` endpoints for developers and users
+- [x] Generate JWT tokens upon successful login
+- [x] Protect `/me` routes with `Depends(auth_guard)`
+- [x] Extend Swagger auth to use real JWT bearer token
 
 ---
 
-## 🔜 Milestone 3: React Frontend Integration
+## 🚧 Milestone 3: React Frontend Integration
 
 - [ ] Set up React frontend project
 - [ ] Create basic pages: Home, Login, Register, Dashboard
@@ -33,26 +33,27 @@
 
 ---
 
-## 🧪 Milestone 4: Testing & CI/CD
+## 🚧 Milestone 4: Testing & CI/CD
 
-- [ ] Add Pytest unit tests for schema validation and endpoints
+- [x] Add Pytest tests for registration routes
+- [ ] Create `test_login.py` and `test_me.py`
 - [ ] Create test DB configuration
 - [ ] Setup GitHub Actions for test + Heroku deploy
 - [ ] Use Black/Flake8 for linting
 
 ---
 
-## 📦 Milestone 5: Database Model Enhancements
+## ✅ Milestone 5: Database Model Enhancements
 
-- [ ] Add timestamp fields (created_at, updated_at)
-- [ ] Add role-based access support (admin, user, developer)
-- [ ] Index frequently queried columns
-- [ ] Enable pagination on `GET /users` and `GET /developers`
+- [x] Add timestamp fields (created_at, updated_at)
+- [x] Add role-based access support (admin, user, developer)
+- [x] Index frequently queried columns
+- [x] Enable pagination on `GET /users` and `GET /developers`
 
 ---
 
 ## 📘 Notes
 
-- ✅ Passwords are now securely hashed on registration.
-- 🔐 Next: Implement JWT login endpoints.
-- 📁 Code lives in `backend/`, `client/`, `scripts/`.
+- Prioritize login + JWT protection before frontend integration.
+- Code and docs live in `backend/`, `client/`, and `scripts/`.
+- Use `ROADMAP.md` to track real-time progress and planning.
