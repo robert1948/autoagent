@@ -136,3 +136,6 @@ dist
 .pnp.*
 venv/venv/
 backend/src/routes/__pycache__/
+/myutil
+myutil
+
