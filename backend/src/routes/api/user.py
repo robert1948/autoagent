@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
-from backend.src.utils import hash_password, verify_password
-from backend.src.database import SessionLocal
-from backend.src.models import User
-from backend.src.auth import create_access_token
-from backend.src.dependencies.auth_guard import get_current_user
-from backend.src.schemas.user import UserRegisterRequest, UserProfile, LoginRequest
+
+from src.utils import hash_password, verify_password
+from src.database import SessionLocal
+from src.models import User
+from src.auth import create_access_token
+from src.dependencies.auth_guard import get_current_user
+from src.schemas.user import UserRegisterRequest, UserProfile, LoginRequest, SuccessMessage
 
 router = APIRouter()
 
@@ -20,47 +20,10 @@ def get_db():
     finally:
         db.close()
 
-# ----- REQUEST MODELS -----
-
-
-class UserRegisterRequest(BaseModel):
-    fullName: str
-    username: str
-    email: EmailStr
-    password: str
-
-
-class LoginRequest(BaseModel):
-    identifier: str
-    password: str
-
-# ----- RESPONSE MODELS -----
-
-
-class UserProfile(BaseModel):
-    fullName: str = Field(..., alias="full_name")
-    username: str
-    email: EmailStr
-    verified: bool
-
-    class Config:
-        allow_population_by_field_name = True
-
-
-class LoginResponse(BaseModel):
-    success: bool
-    token: str
-    message: str
-
-
-class SuccessMessage(BaseModel):
-    success: bool
-    message: str
-
 # ----- REGISTER -----
 
 
-@router.post("/register-user", response_model=SuccessMessage, response_model_exclude_none=True)
+@router.post("/register-user", response_model=SuccessMessage, status_code=status.HTTP_201_CREATED)
 def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
     """
     Register a new user with hashed password and email/username uniqueness check.
@@ -75,12 +38,11 @@ def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
             detail="Email or username already exists"
         )
 
-    hashed_pw = hash_password(data.password)
     new_user = User(
-        full_name=data.fullName,
+        full_name=data.full_name,
         username=data.username,
         email=data.email,
-        password=hashed_pw,
+        hashed_password=hash_password(data.password),
         verified=False,
     )
 
@@ -88,12 +50,12 @@ def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    return {"success": True, "message": "User registered. Please verify your email."}
+    return SuccessMessage(message="User registered. Please verify your email.")
 
 # ----- LOGIN -----
 
 
-@router.post("/login", response_model=LoginResponse, response_model_exclude_none=True)
+@router.post("/login")
 def login_user(data: LoginRequest, db: Session = Depends(get_db)):
     """
     Authenticate user using email or username and return JWT token.
@@ -102,7 +64,7 @@ def login_user(data: LoginRequest, db: Session = Depends(get_db)):
         (User.email == data.identifier) | (User.username == data.identifier)
     ).first()
 
-    if not user or not verify_password(data.password, user.password):
+    if not user or not verify_password(data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email/username or password"
@@ -118,17 +80,19 @@ def login_user(data: LoginRequest, db: Session = Depends(get_db)):
 # ----- PROFILE (/me) -----
 
 
-@router.get("/me", response_model=UserProfile, response_model_exclude_none=True)
+@router.get("/me", response_model=UserProfile)
 def get_profile(current_user: User = Depends(get_current_user)):
     """
     Retrieve authenticated user's profile.
     """
-    return {
-        "full_name": current_user.full_name,
-        "username": current_user.username,
-        "email": current_user.email,
-        "verified": current_user.verified
-    }
+    return UserProfile(
+        id=current_user.id,
+        full_name=current_user.full_name,
+        username=current_user.username,
+        email=current_user.email,
+        role=current_user.role,
+        verified=current_user.verified
+    )
 
 # ----- DEBUG USERS -----
 

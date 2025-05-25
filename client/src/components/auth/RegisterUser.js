@@ -1,117 +1,72 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import api from '../../api/axios';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
-function RegisterUser() {
+const RegisterUser = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    fullName: '',
-    username: '',
-    email: '',
-    password: '',
-  });
-
-  const [errors, setErrors] = useState({});
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-
-    // TODO: Optional real-time validation with debounce
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
-    setErrors({});
-
     try {
-      const response = await axios.post('/api/register-user', formData);
-      if (response.data.success) {
-        navigate('/verify-email'); // Next step in the flow
-      } else {
-        setErrors({ form: response.data.message || 'Something went wrong' });
-      }
+      await api.post('/register-user', {
+        email,
+        password,
+        full_name: fullName,
+      });
+      alert('Registration successful!');
+      navigate('/login');
     } catch (err) {
-      if (err.response && err.response.data) {
-        setErrors(err.response.data.errors || { form: 'Registration failed' });
-      } else {
-        setErrors({ form: 'Server error' });
-      }
+      alert('Registration failed: ' + (err.response?.data?.detail || 'Unknown error'));
     }
-
-    setSubmitting(false);
   };
 
   return (
-    <div className="container mt-5">
-      <h2 className="mb-4">User Registration</h2>
-      {errors.form && <div className="alert alert-danger">{errors.form}</div>}
+    <div className="container">
+      <form onSubmit={handleSubmit} className="shadow-sm p-4 bg-white rounded">
+        <h2 className="mb-4 text-center">Register as User</h2>
 
-      <form onSubmit={handleSubmit} noValidate>
-        <div className="mb-3">
-          <label htmlFor="fullName" className="form-label">Full Name</label>
+        <div className="form-group mb-3">
           <input
             type="text"
             className="form-control"
-            id="fullName"
-            name="fullName"
-            value={formData.fullName}
-            onChange={handleChange}
+            placeholder="Full Name"
+            value={fullName}
+            onChange={e => setFullName(e.target.value)}
             required
           />
         </div>
 
-        <div className="mb-3">
-          <label htmlFor="username" className="form-label">Username</label>
-          <input
-            type="text"
-            className="form-control"
-            id="username"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
-          {errors.username && <small className="text-danger">{errors.username}</small>}
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="email" className="form-label">Email address</label>
+        <div className="form-group mb-3">
           <input
             type="email"
             className="form-control"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
+            placeholder="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
             required
           />
-          {errors.email && <small className="text-danger">{errors.email}</small>}
         </div>
 
-        <div className="mb-3">
-          <label htmlFor="password" className="form-label">Password</label>
+        <div className="form-group mb-4">
           <input
             type="password"
             className="form-control"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
+            placeholder="Password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
             required
           />
         </div>
 
-        <button type="submit" className="btn btn-primary" disabled={submitting}>
-          {submitting ? 'Registering...' : 'Register'}
+        <button type="submit" className="btn btn-primary w-100">
+          Register
         </button>
       </form>
     </div>
   );
-}
+};
 
 export default RegisterUser;

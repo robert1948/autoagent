@@ -1,128 +1,37 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import api from '../../api/axios';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
-function RegisterDeveloper() {
+const RegisterDeveloper = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    fullName: '',
-    company: '',
-    email: '',
-    portfolio: '',
-    password: '',
-  });
 
-  const [errors, setErrors] = useState({});
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
-    setErrors({});
-
     try {
-      const response = await axios.post('/api/register-developer', formData);
-      if (response.data.success) {
-        navigate('/onboarding'); // Next step: human review + API key
-      } else {
-        setErrors({ form: response.data.message || 'Something went wrong' });
-      }
+      const res = await api.post('/register-developer', {
+        email,
+        password,
+        full_name: fullName,
+      });
+      alert('Developer registered successfully!');
+      navigate('/login');
     } catch (err) {
-      if (err.response && err.response.data) {
-        setErrors(err.response.data.errors || { form: 'Registration failed' });
-      } else {
-        setErrors({ form: 'Server error' });
-      }
+      alert('Developer registration failed: ' + (err.response?.data?.detail || 'Unknown error'));
     }
-
-    setSubmitting(false);
   };
 
   return (
-    <div className="container mt-5">
-      <h2 className="mb-4">Developer Registration</h2>
-      {errors.form && <div className="alert alert-danger">{errors.form}</div>}
-
-      <form onSubmit={handleSubmit} noValidate>
-        <div className="mb-3">
-          <label htmlFor="fullName" className="form-label">Full Name</label>
-          <input
-            type="text"
-            className="form-control"
-            id="fullName"
-            name="fullName"
-            value={formData.fullName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="company" className="form-label">Company / Organization</label>
-          <input
-            type="text"
-            className="form-control"
-            id="company"
-            name="company"
-            value={formData.company}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="portfolio" className="form-label">GitHub / Portfolio URL</label>
-          <input
-            type="url"
-            className="form-control"
-            id="portfolio"
-            name="portfolio"
-            value={formData.portfolio}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="email" className="form-label">Email Address</label>
-          <input
-            type="email"
-            className="form-control"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-          {errors.email && <small className="text-danger">{errors.email}</small>}
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="password" className="form-label">Password</label>
-          <input
-            type="password"
-            className="form-control"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <button type="submit" className="btn btn-success" disabled={submitting}>
-          {submitting ? 'Submitting...' : 'Apply as Developer'}
-        </button>
-      </form>
-    </div>
+    <form onSubmit={handleRegister}>
+      <h2>Register as Developer</h2>
+      <input value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Full Name" required />
+      <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required />
+      <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" required />
+      <button type="submit">Register</button>
+    </form>
   );
-}
+};
 
 export default RegisterDeveloper;

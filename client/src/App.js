@@ -1,47 +1,46 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
-// Auth Components
+import Navbar from './components/Navbar';
+import Welcome from './components/Welcome';
+import Login from './components/auth/Login';
 import RegisterUser from './components/auth/RegisterUser';
 import RegisterDeveloper from './components/auth/RegisterDeveloper';
-import Login from './components/auth/Login';
-import EmailVerification from './components/auth/EmailVerification';
+import RequireAuth from './components/auth/RequireAuth';
 
-// Core Pages
-import Home from './pages/Home'; // formerly LandingPage.js (rename accordingly)
-import Welcome from './components/Welcome';
-import Dashboard from './components/Dashboard';
-import ErrorHandler from './components/ErrorHandler';
+import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
 import DeveloperOnboarding from './pages/DeveloperOnboarding';
 import NotFound from './pages/NotFound';
-
-// Support
-import HumanAgentWidget from './components/HumanAgentWidget';
 
 function App() {
   return (
     <Router>
-      <HumanAgentWidget /> {/* Optional global support widget */}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/welcome" element={<Welcome />} />
-
-        {/* Registration */}
-        <Route path="/register-user" element={<RegisterUser />} />
-        <Route path="/verify-email" element={<EmailVerification />} />
-        <Route path="/register-developer" element={<RegisterDeveloper />} />
-        <Route path="/onboarding" element={<DeveloperOnboarding />} />
-
-        {/* Auth */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/error" element={<ErrorHandler />} />
-
-        {/* Dashboard */}
-        <Route path="/dashboard" element={<Dashboard />} />
-
-        {/* 404 Fallback */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <Navbar />
+      <div className="container">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/welcome" element={<Welcome />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register-user" element={<RegisterUser />} />
+          <Route path="/register-developer" element={<RegisterDeveloper />} />
+          <Route
+            path="/dashboard"
+            element={
+              <RequireAuth>
+                <Dashboard />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/onboarding"
+            element={
+              <RequireAuth>
+                <DeveloperOnboarding />
+              </RequireAuth>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
     </Router>
   );
 }

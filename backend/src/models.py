@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from backend.src.database import Base
+from src.database import Base  # ✅
 from datetime import datetime
 
 

@@ -1,8 +1,8 @@
 # backend/seed_db.py
 
-from backend.src.database import SessionLocal
-from backend.src.models import User, Developer
-from backend.src.utils import hash_password
+from src.api.database import SessionLocal
+from src.api.models import User, Developer
+from src.api.utils import hash_password
 
 db = SessionLocal()
 

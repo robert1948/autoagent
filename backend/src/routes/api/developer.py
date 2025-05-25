@@ -1,13 +1,20 @@
-from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel, EmailStr
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from backend.src.database import SessionLocal
-from backend.src.models import Developer
-from backend.src.utils import hash_password, verify_password
-from backend.src.auth import create_access_token
-from backend.src.schemas.developer import DeveloperRegisterRequest, DeveloperProfile
+
+from src.database import SessionLocal
+from src.models import Developer
+from src.utils import hash_password, verify_password
+from src.auth import create_access_token
+from src.dependencies.auth_guard import get_current_developer
+from src.schemas.developer import (
+    DeveloperRegisterRequest,
+    DeveloperProfile,
+)
+from src.schemas.user import LoginRequest, SuccessMessage
 
 router = APIRouter()
+
+# Dependency to provide DB session
 
 
 def get_db():
@@ -18,62 +25,18 @@ def get_db():
         db.close()
 
 
-class DeveloperRequest(BaseModel):
-    fullName: str
-    company: str
-    email: EmailStr
-    portfolio: str
-    password: str
-
-
-class DeveloperLoginRequest(BaseModel):
-    identifier: str
-    password: str
-
-
-class LoginResponse(BaseModel):
-    success: bool
-    token: str
-    message: str
-
-
-class SuccessMessage(BaseModel):
-    success: bool
-    message: str
-
-
-@router.post("/register-developer", response_model=SuccessMessage)
-def register_developer(data: DeveloperRequest, db: Session = Depends(get_db)):
-    existing = db.query(Developer).filter(
-        Developer.email == data.email).first()
-    if existing:
+@router.post("/login-developer", response_model=SuccessMessage)
+def login_developer(payload: LoginRequest, db: Session = Depends(get_db)):
+    developer = db.query(Developer).filter(
+        Developer.email == payload.email).first()
+    if not developer or not verify_password(payload.password, developer.hashed_password):
         raise HTTPException(
-            status_code=400, detail="Developer already registered")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    new_dev = Developer(
-        full_name=data.fullName,
-        company=data.company,
-        email=data.email,
-        portfolio=data.portfolio,
-        password=hash_password(data.password)
-    )
-    db.add(new_dev)
-    db.commit()
-    db.refresh(new_dev)
-
-    return {"success": True, "message": "Developer registration submitted"}
+    access_token = create_access_token(data={"sub": developer.email})
+    return SuccessMessage(message=access_token)
 
 
-@router.post("/login", response_model=LoginResponse)
-def login_developer(data: DeveloperLoginRequest, db: Session = Depends(get_db)):
-    dev = db.query(Developer).filter(
-        Developer.email == data.identifier).first()
-    if not dev or not verify_password(data.password, dev.password):
-        raise HTTPException(status_code=401, detail="Invalid login")
-
-    token = create_access_token({"sub": dev.email})
-    return {
-        "success": True,
-        "token": token,
-        "message": f"Welcome back, {dev.full_name}!"
-    }
+@router.get("/developer/me", response_model=DeveloperProfile)
+def get_developer_me(current_dev: Developer = Depends(get_current_developer)):
+    return current_dev

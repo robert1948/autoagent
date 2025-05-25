@@ -1,19 +1,20 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from backend.src.database import SessionLocal
-from backend.src.models import Developer
-from backend.src.schemas.developer import (
+from src.database import SessionLocal
+from src.models import Developer
+from src.schemas.developer import (
     DeveloperRegisterRequest,
-    DeveloperSuccessMessage,
-    DeveloperProfile
+    DeveloperProfile,
 )
-from backend.src.utils import hash_password
-from backend.src.dependencies.auth_guard import get_current_developer
+from src.schemas.user import SuccessMessage  # ✅ Shared schema
+from src.utils import hash_password
+from src.dependencies.auth_guard import get_current_developer
 
 router = APIRouter()
 
 
+# Dependency to provide DB session
 def get_db():
     db = SessionLocal()
     try:
@@ -22,27 +23,25 @@ def get_db():
         db.close()
 
 
-@router.post("/register-developer", response_model=DeveloperSuccessMessage, status_code=status.HTTP_201_CREATED)
-def register_developer(payload: DeveloperRegisterRequest, db: Session = Depends(get_db)):
-    if db.query(Developer).filter(Developer.email == payload.email).first():
+@router.post("/register-developer", response_model=SuccessMessage, status_code=status.HTTP_201_CREATED)
+def register_developer(data: DeveloperRegisterRequest, db: Session = Depends(get_db)):
+    if db.query(Developer).filter_by(email=data.email).first():
         raise HTTPException(
-            status_code=400, detail="Developer with this email already exists"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Developer with this email already exists"
         )
 
-    new_dev = Developer(
-        full_name=payload.fullName,
-        company=payload.company,
-        email=payload.email,
-        portfolio=payload.portfolio,
-        password=hash_password(payload.password)
+    developer = Developer(
+        full_name=data.full_name,
+        email=data.email,
+        hashed_password=hash_password(data.password),
     )
-
-    db.add(new_dev)
+    db.add(developer)
     db.commit()
-    db.refresh(new_dev)
-    return {"success": True, "message": "Developer registration successful"}
+    db.refresh(developer)
+    return SuccessMessage(message="Developer registered successfully")
 
 
-@router.get("/me", response_model=DeveloperProfile)
-def get_developer_profile(current_dev=Depends(get_current_developer)):
-    return current_dev
+@router.get("/developer/me", response_model=DeveloperProfile)
+def get_developer_profile(current_developer: Developer = Depends(get_current_developer)):
+    return current_developer

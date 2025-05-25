@@ -1,37 +1,23 @@
-# backend/src/schemas/user.py
-
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
 
 
 class UserRegisterRequest(BaseModel):
-    fullName: str
-    username: str
+    full_name: str
     email: EmailStr
     password: str
 
 
 class LoginRequest(BaseModel):
-    identifier: str
+    email: EmailStr
     password: str
 
 
 class UserProfile(BaseModel):
-    fullName: str = Field(..., alias="full_name")
-    username: str
+    id: int
+    full_name: str
     email: EmailStr
-    verified: bool
-
-    class Config:
-        populate_by_name = True  # Updated for Pydantic v2
-        from_attributes = True
-
-
-class LoginResponse(BaseModel):
-    success: bool
-    token: str
-    message: str
+    role: str
 
 
 class SuccessMessage(BaseModel):
-    success: bool
     message: str
