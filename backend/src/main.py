@@ -1,24 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-import os
+from pathlib import Path
 
 from src.config.settings import settings
-from src.database import engine
-from src.models import Base
 from src.router import router as api_router
 
-app = FastAPI(
-    title="AutoAgent API",
-    description="API for user and developer registration, login, and profile management",
-    version="1.0.0"
-)
+app = FastAPI()
 
-# Create tables
-Base.metadata.create_all(bind=engine)
-
-# CORS for development/testing (adjust as needed for production)
+# CORS settings
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.FRONTEND_ORIGIN],
@@ -27,26 +18,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static React files
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Serve favicon
-
-
-@app.get("/favicon.ico", include_in_schema=False)
-def favicon():
-    return FileResponse("static/favicon.ico")
-
-# Serve React frontend index.html
-
-
-@app.get("/", include_in_schema=False)
-def serve_frontend():
-    index_path = "static/index.html"
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    return {"message": "AutoAgent backend is running"}
-
-
-# Include API routes
+# Register backend routes
 app.include_router(api_router)
+
+# Serve React static files
+static_dir = Path(__file__).parent.parent / "static"
+app.mount("/static", StaticFiles(directory=static_dir / "static"), name="static")
+
+# Fallback route for React Router - serves index.html
+
+
+@app.get("/{full_path:path}", response_class=HTMLResponse)
+async def serve_react_app(request: Request, full_path: str):
+    index_file = static_dir / "index.html"
+    if index_file.exists():
+        return index_file.read_text(encoding="utf-8")
+    return HTMLResponse(status_code=404, content="React frontend not found.")
