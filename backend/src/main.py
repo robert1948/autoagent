@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+import os
 
 from src.config.settings import settings
 from src.database import engine
@@ -14,35 +15,38 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Create DB tables
+# Create tables
 Base.metadata.create_all(bind=engine)
 
-# Enable CORS
+# CORS for development/testing (adjust as needed for production)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_ORIGIN],  # e.g. http://localhost:3000
+    allow_origins=[settings.FRONTEND_ORIGIN],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Serve static files (e.g., favicon.ico)
+# Mount static React files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Serve favicon at /favicon.ico
+# Serve favicon
 
 
 @app.get("/favicon.ico", include_in_schema=False)
 def favicon():
     return FileResponse("static/favicon.ico")
 
-# Welcome route
+# Serve React frontend index.html
 
 
-@app.get("/", response_class=HTMLResponse)
-def root():
-    return "<h2>🚀 AutoAgent API is running.</h2><p>Visit <a href='/docs'>/docs</a> to explore the API.</p>"
+@app.get("/", include_in_schema=False)
+def serve_frontend():
+    index_path = "static/index.html"
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"message": "AutoAgent backend is running"}
 
 
-# Mount your API router
+# Include API routes
 app.include_router(api_router)
