@@ -23,10 +23,10 @@
 
 ---
 
-## 🚧 Milestone 3: React Frontend Integration
+## 🚧 Create
 
-- [ ] Set up React frontend project
-- [ ] Create basic pages: Home, Login, Register, Dashboard
+- [x ] Set up React frontend project
+- [ x] Create basic pages: Home, Login, Register, Dashboard
 - [ ] Add Axios client with JWT token storage
 - [ ] Hook frontend forms to backend `/register-*` and `/login` routes
 - [ ] Display user data from `/me` after login
