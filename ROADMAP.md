@@ -1,59 +1,92 @@
-# ROADMAP
+# 📍 AutoAgent Project Roadmap
 
-## ✅ Milestone 1: Project Initialization & Deployment
-
-- [x] Set up FastAPI backend structure
-- [x] Configure `.env` with `DATABASE_URL`, `SECRET_KEY`, `DEV_JWT`
-- [x] Split schema files: `schemas/user.py`, `schemas/developer.py`
-- [x] Implement `GET /developers` and `GET /users` routes
-- [x] Add `POST /register-developer` and `POST /register-user`
-- [x] Generate Swagger docs with auth hint token
-- [x] Deploy backend to Heroku with working root health check
-- [x] Test Swagger locally and on Heroku
+_Last updated: 2025-05-25_
 
 ---
 
-## ✅ Milestone 2: Authentication & Security
+## ✅ Milestone 1: Project Initialization
 
-- [x] Implement password hashing using `bcrypt`
-- [x] Add `POST /login` endpoints for developers and users
-- [x] Generate JWT tokens upon successful login
-- [x] Protect `/me` routes with `Depends(auth_guard)`
-- [x] Extend Swagger auth to use real JWT bearer token
-
----
-
-## 🚧 Create
-
-- [x ] Set up React frontend project
-- [ x] Create basic pages: Home, Login, Register, Dashboard
-- [ ] Add Axios client with JWT token storage
-- [ ] Hook frontend forms to backend `/register-*` and `/login` routes
-- [ ] Display user data from `/me` after login
+- [x] Set up GitHub repository `autoagent`
+- [x] Initialize backend with FastAPI structure
+- [x] Add frontend base using React and Bootstrap
+- [x] Configure `.env`, CORS, and settings.py
+- [x] Add JWT-based authentication
 
 ---
 
-## 🚧 Milestone 4: Testing & CI/CD
+## ✅ Milestone 2: Authentication & Core API
 
-- [x] Add Pytest tests for registration routes
-- [ ] Create `test_login.py` and `test_me.py`
-- [ ] Create test DB configuration
-- [ ] Setup GitHub Actions for test + Heroku deploy
-- [ ] Use Black/Flake8 for linting
-
----
-
-## ✅ Milestone 5: Database Model Enhancements
-
-- [x] Add timestamp fields (created_at, updated_at)
-- [x] Add role-based access support (admin, user, developer)
-- [x] Index frequently queried columns
-- [x] Enable pagination on `GET /users` and `GET /developers`
+- [x] User and Developer registration routes
+- [x] JWT login for both roles
+- [x] `/me` endpoints for authenticated profiles
+- [x] Password hashing with passlib
+- [x] Swagger UI with `DEV_JWT` preset for testing
+- [x] Role-based auth guards for route protection
 
 ---
 
-## 📘 Notes
+## ✅ Milestone 3: React Frontend Integration
 
-- Prioritize login + JWT protection before frontend integration.
-- Code and docs live in `backend/`, `client/`, and `scripts/`.
-- Use `ROADMAP.md` to track real-time progress and planning.
+- [x] Frontend AuthContext with global state
+- [x] Login and registration forms (user/dev)
+- [x] Protected routes using `RequireAuth`
+- [x] Navbar shows login status + dropdown menu
+- [x] Dynamic home page (auth-aware)
+- [x] Basic profile and dashboard pages
+- [x] Global styling via `master.css`
+
+---
+
+## ✅ Milestone 4: Deployment
+
+- [x] Heroku backend deployed using GitHub integration
+- [x] React app built and copied to `backend/static/`
+- [x] FastAPI serves frontend with fallback for React Router
+- [x] `.env` and config vars matched with Heroku
+- [x] Auto-deploy enabled via GitHub main branch
+- [x] Verified live deployment at:
+  - 🌐 https://autorisen-d2ba5f0027e2.herokuapp.com
+
+---
+
+## ⏳ Milestone 5: Onboarding & Agents (In Progress)
+
+- [ ] Developer onboarding controller & routes
+- [ ] Smart checklist schema for AI agent guidance
+- [ ] Dashboard to show onboarding stage
+- [ ] Background task (optional) to track status
+- [ ] Timeline visualization
+
+---
+
+## ⏳ Milestone 6: Agent Execution Layer
+
+- [ ] Agent planner & interpreter modules
+- [ ] Integration with external tools (e.g., GitHub, Notion)
+- [ ] Secure action runner with audit logging
+- [ ] Simulated agent demo (frontend + backend)
+
+---
+
+## ⏳ Milestone 7: UI/UX Enhancements
+
+- [ ] Mobile responsive layout
+- [ ] Toast alerts and form feedback
+- [ ] Animated transitions (Framer Motion)
+- [ ] Light/dark mode toggle
+- [ ] Accessibility (ARIA, keyboard support)
+
+---
+
+## 🧠 Long-term Vision
+
+- ⌛ AI-assisted workflows with persistent memory
+- ⌛ Real-time collaboration
+- ⌛ Marketplace for agent templates
+- ⌛ SaaS billing + user roles (admin, team, client)
+
+---
+
+## 📦 Project Layout Reference
+
+See `Autoplan.md` or run `scripts/project-diagram.sh` for the full directory tree.
