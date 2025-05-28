@@ -1,6 +1,6 @@
 # 📍 AutoAgent Project Roadmap
 
-_Last updated: 2025-05-25_
+_Last updated: 2025-05-28_
 
 ---
 
@@ -33,7 +33,7 @@ _Last updated: 2025-05-25_
 - [x] Navbar shows login status + dropdown menu
 - [x] Dynamic home page (auth-aware)
 - [x] Basic profile and dashboard pages
-- [x] Global styling via `master.css`
+- [x] Global styling via App.css
 
 ---
 
@@ -44,7 +44,7 @@ _Last updated: 2025-05-25_
 - [x] FastAPI serves frontend with fallback for React Router
 - [x] `.env` and config vars matched with Heroku
 - [x] Auto-deploy enabled via GitHub main branch
-- [x] Verified live deployment at:
+- [x] Verified live deployment:
   - 🌐 https://autorisen-d2ba5f0027e2.herokuapp.com
 
 ---
@@ -89,4 +89,4 @@ _Last updated: 2025-05-25_
 
 ## 📦 Project Layout Reference
 
-See `Autoplan.md` or run `scripts/project-diagram.sh` for the full directory tree.
+See `autoplan.md` or run `scripts/project-diagram.sh` for the full directory tree.
