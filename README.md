@@ -47,18 +47,21 @@ autoagent/
 
 ## 🧪 Local Development
 
-1. **Install backend requirements**  
+1. **Install backend requirements**
+
    ```bash
    pip install -r requirements.txt
    ```
 
-2. **Start backend**  
+2. **Start backend**
+
    ```bash
    cd backend
    uvicorn src.main:app --reload --port 8000
    ```
 
-3. **Start frontend**  
+3. **Start frontend**
+
    ```bash
    cd client
    npm install
@@ -74,25 +77,37 @@ autoagent/
 ## 🚀 Production Deployment
 
 Auto-deploys to Heroku:
+
 - 🌍 [https://autorisen-d2ba5f0027e2.herokuapp.com](https://autorisen-d2ba5f0027e2.herokuapp.com)
 
 Steps:
+
 1. `npm run build` in `client/`
 2. Copy to `backend/static/`
 3. Push to GitHub → triggers Heroku build
 
 ---
 
+#
+
 ## 📅 Development Roadmap
 
-See [ROADMAP.md](./ROADMAP.md) for milestone breakdowns:
-- Project Setup
-- Auth System
-- Frontend Integration
-- Heroku Deployment
-- Onboarding Flow
-- Agent Execution
-- UI Polish
+See [autoplan.md](./autoplan.md) for the full milestone breakdown:
+
+- ✅ Milestone 1: Project Initialization
+- ✅ Milestone 2: Authentication & Core API
+- ✅ Milestone 3: React Frontend Integration
+- ✅ Milestone 4: Deployment
+- ⏳ Milestone 5: Onboarding & Agents (In Progress)
+- ⏳ Milestone 6: Agent Execution Layer
+- ⏳ Milestone 7: UI/UX Enhancements
+
+**Long-term Vision**
+
+- AI-assisted workflows with persistent memory
+- Real-time collaboration
+- Marketplace for agent templates
+- SaaS billing + user roles (admin, team, client)
 
 ---
 

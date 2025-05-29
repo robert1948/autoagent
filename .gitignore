@@ -28,5 +28,3 @@ Thumbs.db
 
 # Heroku runtime
 *.sqlite3
-
-autoplan.md
