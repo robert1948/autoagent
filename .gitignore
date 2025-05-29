@@ -28,3 +28,4 @@ Thumbs.db
 
 # Heroku runtime
 *.sqlite3
+.venv/
