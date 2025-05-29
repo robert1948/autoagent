@@ -7,16 +7,16 @@ class DeveloperLoginRequest(BaseModel):
     password: str
 
 
-class OnboardingUpdateRequest(BaseModel):
-    onboarding: Dict[str, bool]
-
-
 class DeveloperRegisterRequest(BaseModel):
     full_name: str
     email: EmailStr
     password: str
     company: Optional[str] = None
     portfolio: Optional[str] = None
+
+
+class OnboardingUpdateRequest(BaseModel):
+    onboarding: Dict[str, bool]
 
 
 class DeveloperProfile(BaseModel):
