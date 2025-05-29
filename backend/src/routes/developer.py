@@ -5,14 +5,13 @@ from src.database import SessionLocal
 from src.models import Developer
 from src.schemas.developer import (
     DeveloperRegisterRequest,
-    DeveloperLoginRequest,  # ✅ Needed for login
     DeveloperProfile,
-    OnboardingUpdate,
+    DeveloperLoginRequest,
+    OnboardingUpdateRequest  # ✅ Correct and single import
 )
 from src.schemas.user import SuccessMessage, Token
 from src.utils import hash_password, verify_password, create_access_token
 from src.dependencies.auth_guard import get_current_developer
-from src.schemas.developer import OnboardingUpdateRequest
 
 router = APIRouter()
 
@@ -69,18 +68,6 @@ def get_developer_profile(current_developer: Developer = Depends(get_current_dev
 
 @router.patch("/developer/onboarding", response_model=SuccessMessage)
 def update_onboarding(
-    payload: OnboardingUpdate,
-    db: Session = Depends(get_db),
-    current_developer: Developer = Depends(get_current_developer)
-):
-    current = current_developer.onboarding or {}
-    current.update(payload.updates)
-    current_developer.onboarding = current
-    db.commit()
-    return {"success": True, "message": "Onboarding progress updated"}
-
-@router.patch("/developer/onboarding", response_model=SuccessMessage)
-def update_onboarding_status(
     payload: OnboardingUpdateRequest,
     db: Session = Depends(get_db),
     current_developer: Developer = Depends(get_current_developer)
@@ -88,4 +75,3 @@ def update_onboarding_status(
     current_developer.onboarding = payload.onboarding
     db.commit()
     return {"success": True, "message": "Onboarding status updated"}
-
