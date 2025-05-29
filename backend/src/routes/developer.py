@@ -5,11 +5,14 @@ from src.database import SessionLocal
 from src.models import Developer
 from src.schemas.developer import (
     DeveloperRegisterRequest,
+    DeveloperLoginRequest,  # ✅ Needed for login
     DeveloperProfile,
+    OnboardingUpdate,
 )
-from src.schemas.user import SuccessMessage  # ✅ Shared schema
-from src.utils import hash_password
+from src.schemas.user import SuccessMessage, Token
+from src.utils import hash_password, verify_password, create_access_token
 from src.dependencies.auth_guard import get_current_developer
+from src.schemas.developer import OnboardingUpdateRequest
 
 router = APIRouter()
 
@@ -23,25 +26,66 @@ def get_db():
         db.close()
 
 
-@router.post("/register-developer", response_model=SuccessMessage, status_code=status.HTTP_201_CREATED)
+@router.post("/register-developer", response_model=SuccessMessage)
 def register_developer(data: DeveloperRegisterRequest, db: Session = Depends(get_db)):
     if db.query(Developer).filter_by(email=data.email).first():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Developer with this email already exists"
-        )
+        raise HTTPException(status_code=400, detail="Developer already exists")
+
+    onboarding_template = {
+        "upload_portfolio": False,
+        "complete_profile": False,
+        "connect_github": False,
+        "start_agent_task": False
+    }
 
     developer = Developer(
         full_name=data.full_name,
+        company=data.company,
         email=data.email,
-        hashed_password=hash_password(data.password),
+        portfolio=data.portfolio,
+        password=hash_password(data.password),
+        onboarding=onboarding_template
     )
     db.add(developer)
     db.commit()
     db.refresh(developer)
-    return SuccessMessage(message="Developer registered successfully")
+    return {"success": True, "message": "Developer registered successfully"}
+
+
+@router.post("/login-developer", response_model=Token)
+def login_developer(data: DeveloperLoginRequest, db: Session = Depends(get_db)):
+    developer = db.query(Developer).filter_by(email=data.email).first()
+    if not developer or not verify_password(data.password, developer.password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    access_token = create_access_token({"sub": developer.email})
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.get("/developer/me", response_model=DeveloperProfile)
 def get_developer_profile(current_developer: Developer = Depends(get_current_developer)):
     return current_developer
+
+
+@router.patch("/developer/onboarding", response_model=SuccessMessage)
+def update_onboarding(
+    payload: OnboardingUpdate,
+    db: Session = Depends(get_db),
+    current_developer: Developer = Depends(get_current_developer)
+):
+    current = current_developer.onboarding or {}
+    current.update(payload.updates)
+    current_developer.onboarding = current
+    db.commit()
+    return {"success": True, "message": "Onboarding progress updated"}
+
+@router.patch("/developer/onboarding", response_model=SuccessMessage)
+def update_onboarding_status(
+    payload: OnboardingUpdateRequest,
+    db: Session = Depends(get_db),
+    current_developer: Developer = Depends(get_current_developer)
+):
+    current_developer.onboarding = payload.onboarding
+    db.commit()
+    return {"success": True, "message": "Onboarding status updated"}
+

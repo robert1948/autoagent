@@ -1,4 +1,5 @@
-from pydantic_settings import BaseSettings
+# filepath: /workspaces/autoagent/backend/src/config/settings.py
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -6,11 +7,12 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     DATABASE_URL: str
-    FRONTEND_ORIGIN: str  # ✅ Required for CORS
+    FRONTEND_ORIGIN: str
 
-    class Config:
-        env_file = ".env"
+model_config = SettingsConfigDict(
+    env_file="../../.env", env_file_encoding="utf-8")
 
 
-# ✅ This must be at the bottom
 settings = Settings()
+print("🔍 Loaded DATABASE_URL from .env:", settings.DATABASE_URL)
+

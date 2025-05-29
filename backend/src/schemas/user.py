@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional, Dict
 
 
 class UserRegisterRequest(BaseModel):
@@ -17,7 +18,17 @@ class UserProfile(BaseModel):
     full_name: str
     email: EmailStr
     role: str
+    onboarding: Optional[Dict[str, bool]] = None  # ✅ Add this
+
+    class Config:
+        orm_mode = True
 
 
 class SuccessMessage(BaseModel):
+    success: bool = True
     message: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str

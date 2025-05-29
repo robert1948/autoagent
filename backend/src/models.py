@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from src.database import Base  # ✅
+from sqlalchemy.dialects.postgresql import JSON  # ✅ Add this import
+from src.database import Base
 from datetime import datetime
-
 
 class User(Base):
     __tablename__ = "users"
@@ -16,7 +16,6 @@ class User(Base):
     updated_at = Column(DateTime, default=datetime.utcnow,
                         onupdate=datetime.utcnow)
 
-
 class Developer(Base):
     __tablename__ = "developers"
 
@@ -27,6 +26,7 @@ class Developer(Base):
     portfolio = Column(String, nullable=False)
     password = Column(String, nullable=False)
     verified = Column(Boolean, default=False)
+    onboarding = Column(JSON, default=dict)  # ✅ New field for onboarding tracking
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow,
                         onupdate=datetime.utcnow)
