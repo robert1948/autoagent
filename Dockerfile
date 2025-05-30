@@ -1,5 +1,8 @@
-# Base Python image with devcontainers support
+# Use a Python 3.10 base image with devcontainer support
 FROM mcr.microsoft.com/devcontainers/python:3.10
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -10,10 +13,10 @@ RUN apt-get update && apt-get install -y \
     ca-certificates && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js 20 from NodeSource
+# Install Node.js 20.x (correct source setup)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    # rm -f /etc/apt/sources.list.d/nodesource.list
-    rm -f /etc/apt/sources.list.d/nodesource.list
+    apt-get update && apt-get install -y nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip
 RUN pip install --upgrade pip
@@ -21,12 +24,12 @@ RUN pip install --upgrade pip
 # Set working directory
 WORKDIR /workspaces/autoagent
 
-# Copy only requirements.txt first to leverage Docker cache
-COPY requirements.txt .requirements.txt
-RUN if [ -f "requirements.txt" ]; then pip install -r requirements.txt; else echo "requirements.txt not found, skipping pip install"; fi
+# Copy requirements.txt and install first (for Docker layer caching)
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
 
-# Copy the rest of the application
+# Copy rest of the project
 COPY . .
 
-# Optional: Set default shell to bash for convenience
-# SHELL ["/bin/bash", "-c"]
+# Optional: set shell for VS Code terminal convenience
+SHELL ["/bin/bash", "-c"]
