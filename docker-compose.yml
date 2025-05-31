@@ -8,39 +8,44 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: autoagent
+    ports:
+      - "5433:5432"   # Host 5433 -> Container 5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
 
   backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
-    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
-    working_dir: /workspaces/autoagent/backend
     volumes:
-      - .:/workspaces/autoagent
+      - ./backend:/app
+    working_dir: /app
     ports:
-      - "8000:8000"
+      - "8001:8000"  # Host 8001 -> Container 8000
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/autoagent?sslmode=disable"
+      SECRET_KEY: "supersecretkey"
+      ALGORITHM: "HS256"
+      ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+      FRONTEND_ORIGIN: "http://localhost:3001"
     depends_on:
       - db
-    environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/autoagent
-      PYTHONUNBUFFERED: 1
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
     build:
       context: ./client
-    working_dir: /client
-    command: npm start
+      dockerfile: Dockerfile
     volumes:
-      - ./client:/client
-      - /client/node_modules
+      - ./client:/app
+    working_dir: /app
     ports:
-      - "3000:3000"
+      - "3001:3000"  # Host 3001 -> Container 3000
+    stdin_open: true
+    tty: true
     depends_on:
       - backend
+    command: npm start
 
 volumes:
   postgres_data:

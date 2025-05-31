@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import axios from './api/axios'; // Adjust path if needed
+import axios from '../api/axios'; // Adjusted path!
 
 const AuthContext = createContext();
 

@@ -26,21 +26,18 @@ def get_db():
 @router.post("/register-user", response_model=SuccessMessage, status_code=status.HTTP_201_CREATED)
 def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
     """
-    Register a new user with hashed password and email/username uniqueness check.
+    Register a new user with hashed password and email uniqueness check.
     """
-    existing_user = db.query(User).filter(
-        (User.email == data.email) | (User.username == data.username)
-    ).first()
+    existing_user = db.query(User).filter(User.email == data.email).first()
 
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email or username already exists"
+            detail="Email already exists"
         )
 
     new_user = User(
         full_name=data.full_name,
-        username=data.username,
         email=data.email,
         hashed_password=hash_password(data.password),
         verified=False,
@@ -58,16 +55,14 @@ def register_user(data: UserRegisterRequest, db: Session = Depends(get_db)):
 @router.post("/login")
 def login_user(data: LoginRequest, db: Session = Depends(get_db)):
     """
-    Authenticate user using email or username and return JWT token.
+    Authenticate user using email and return JWT token.
     """
-    user = db.query(User).filter(
-        (User.email == data.identifier) | (User.username == data.identifier)
-    ).first()
+    user = db.query(User).filter(User.email == data.email).first()
 
     if not user or not verify_password(data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email/username or password"
+            detail="Invalid email or password"
         )
 
     token = create_access_token({"sub": user.email})
@@ -88,10 +83,9 @@ def get_profile(current_user: User = Depends(get_current_user)):
     return UserProfile(
         id=current_user.id,
         full_name=current_user.full_name,
-        username=current_user.username,
         email=current_user.email,
         role=current_user.role,
-        verified=current_user.verified
+        onboarding=current_user.onboarding
     )
 
 # ----- DEBUG USERS -----
@@ -109,7 +103,6 @@ def debug_users(db: Session = Depends(get_db)):
         {
             "id": user.id,
             "full_name": user.full_name,
-            "username": user.username,
             "email": user.email,
             "verified": user.verified
         }
