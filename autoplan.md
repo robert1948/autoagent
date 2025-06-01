@@ -1,6 +1,6 @@
 # 📍 AutoAgent Project Roadmap
 
-_Last updated: 2025-05-28_
+_Last updated: 2025-05-30_
 
 ---
 
@@ -49,7 +49,17 @@ _Last updated: 2025-05-28_
 
 ---
 
-## ⏳ Milestone 5: Onboarding & Agents (In Progress)
+## ✅ Milestone 5: Database & Alembic Migrations
+
+- [x] PostgreSQL database integrated via Docker
+- [x] Created initial tables: `users`, `developers`, `alembic_version`
+- [x] Alembic configured and migrations applied
+- [x] Fixed circular import issues for SQLAlchemy models
+- [x] Confirmed database tables with `psql`
+
+---
+
+## ⏳ Milestone 6: Onboarding & Agents (In Progress)
 
 - [ ] Developer onboarding controller & routes
 - [ ] Smart checklist schema for AI agent guidance
@@ -59,7 +69,7 @@ _Last updated: 2025-05-28_
 
 ---
 
-## ⏳ Milestone 6: Agent Execution Layer
+## ⏳ Milestone 7: Agent Execution Layer
 
 - [ ] Agent planner & interpreter modules
 - [ ] Integration with external tools (e.g., GitHub, Notion)
@@ -68,7 +78,7 @@ _Last updated: 2025-05-28_
 
 ---
 
-## ⏳ Milestone 7: UI/UX Enhancements
+## ⏳ Milestone 8: UI/UX Enhancements
 
 - [ ] Mobile responsive layout
 - [ ] Toast alerts and form feedback
