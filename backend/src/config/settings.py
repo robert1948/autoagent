@@ -1,5 +1,6 @@
 # filepath: /workspaces/autoagent/backend/src/config/settings.py
-from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -9,10 +10,13 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     FRONTEND_ORIGIN: str
 
-model_config = SettingsConfigDict(
-    env_file="../../.env", env_file_encoding="utf-8")
+    class Config:
+        # This ensures:
+        # ✅ In local dev: reads .env file
+        # ✅ In Heroku: uses config vars automatically
+        env_file = "../../.env"   # Adjust if your .env is in root or backend
+        env_file_encoding = "utf-8"
 
 
 settings = Settings()
-print("🔍 Loaded DATABASE_URL from .env:", settings.DATABASE_URL)
-
+print("🔍 Loaded DATABASE_URL from environment:", settings.DATABASE_URL)

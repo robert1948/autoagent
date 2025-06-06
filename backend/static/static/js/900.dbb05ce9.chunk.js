@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkclient=self.webpackChunkclient||[]).push([[900],{900:(e,n,c)=>{c.r(n),c.d(n,{default:()=>t});c(43);var l=c(579);function t(){return(0,l.jsx)("h2",{children:"NotFound (Placeholder)"})}}}]);
+//# sourceMappingURL=900.dbb05ce9.chunk.js.map
