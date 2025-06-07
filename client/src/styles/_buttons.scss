@@ -1,17 +1,29 @@
-.hero-button,
-.btn-hero {
-  margin-top: 1rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 1.125rem;
-  background-color: #ffc107;
-  color: #212529;
-  border: none;
-  border-radius: 0.5rem;
-  text-decoration: none;
-  transition: all 0.2s ease-in-out;
-}
-.hero-button:hover,
-.btn-hero:hover {
-  background-color: #e0a800;
-  color: #212529;
+// _buttons.scss
+
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &.btn-primary {
+    background-color: #f96332;
+    color: #fff;
+
+    &:hover {
+      background-color: #e04e24;
+    }
+  }
+
+  &.btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+
+    &:hover {
+      background-color: #5a6268;
+    }
+  }
 }

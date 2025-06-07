@@ -1,20 +1,9 @@
-// Import variables first (used by other modules)
-@import "variables";
+// app.scss
 
-// Import global layout, typography, etc.
-@import "layout";
-@import "typography";
-
-// Import navbar, buttons, forms, responsive enhancements
-@import "navbar";
-@import "buttons";
-@import "forms";
-@import "responsive";
-
-// Additional global styles can go here
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f8f9fa;
-  margin: 0;
-  padding: 0;
-}
+@import './variables';
+@import './layout';
+@import './typography';
+@import './navbar';
+@import './buttons';
+@import './forms';
+@import './responsive';

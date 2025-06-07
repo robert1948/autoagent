@@ -1,20 +1,25 @@
-.title {
-  font-size: 3.5rem;
-  font-weight: 700;
-  color: #007bff;
-  margin-bottom: 0.5rem;
+// _typography.scss
+
+body {
+  font-family: Arial, sans-serif;
+  color: #333;
+  line-height: 1.6;
 }
-.subtitle {
-  font-size: 1.25rem;
-  color: #6c757d;
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: bold;
+  margin: 1rem 0;
 }
-.homepage-header {
-  background-color: #212529;
-  color: #fff;
-  padding: 4rem 1.5rem;
-  text-align: center;
+
+p {
+  margin: 0.5rem 0;
 }
-.homepage-header h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+
+a {
+  color: #f96332;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }

@@ -1,50 +1,23 @@
-/* client/src/styles/_responsive.scss */
+// _responsive.scss
 
-/* General responsive container */
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem; /* some horizontal padding */
+// Utility classes for responsive typography & layout
+.text-center {
+  text-align: center;
 }
 
-/* Navbar adjustments for mobile */
-.navbar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 1rem;
-
-  .navbar-brand {
-    font-size: 1.25rem;
-    font-weight: bold;
-  }
-
-  .navbar-toggle {
-    display: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-  }
-
-  .navbar-menu {
-    display: flex;
-    flex-direction: row;
-  }
+.hide-on-mobile {
+  display: block;
 
   @media (max-width: 768px) {
-    .navbar-toggle {
-      display: block;
-    }
-
-    .navbar-menu {
-      display: none;
-      flex-direction: column;
-      width: 100%;
-
-      &.active {
-        display: flex;
-      }
-    }
+    display: none;
   }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.responsive-img {
+  max-width: 100%;
+  height: auto;
 }
