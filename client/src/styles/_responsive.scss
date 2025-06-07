@@ -3,6 +3,8 @@
     align-items: flex-start;
     padding-top: 2rem;
     min-height: auto;
+    width: 100%; // Ensure full width on mobile
+    box-sizing: border-box;
   }
   .title {
     font-size: 2.25rem;
@@ -12,8 +14,17 @@
   }
   .homepage-header {
     padding: 2rem 1rem;
+    width: 100%; // Ensure header is full width
+    box-sizing: border-box;
+  }
+  .hamburger-menu {
+    display: block; // Show hamburger on mobile
+  }
+  .navbar-menu {
+    display: none; // Hide regular menu on mobile
   }
 }
+
 @media (min-width: 576px) and (max-width: 991.98px) {
   .title {
     font-size: 3rem;
@@ -24,7 +35,14 @@
   .homepage-header {
     padding: 3rem 1.5rem;
   }
+  .hamburger-menu {
+    display: none; // Hide hamburger on tablet/desktop
+  }
+  .navbar-menu {
+    display: flex; // Show regular menu
+  }
 }
+
 @media (min-width: 992px) {
   .fullscreen-container {
     padding: 0 3rem;
@@ -34,5 +52,11 @@
   }
   .homepage-header {
     padding: 5rem 2rem;
+  }
+  .hamburger-menu {
+    display: none; // Hide hamburger on desktop
+  }
+  .navbar-menu {
+    display: flex; // Show regular menu
   }
 }
