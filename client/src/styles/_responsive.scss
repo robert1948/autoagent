@@ -1,23 +1,180 @@
-// _responsive.scss
+// _responsive.scss - Mobile-first responsive design
 
-// Utility classes for responsive typography & layout
-.text-center {
-  text-align: center;
-}
+// Breakpoints
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
 
-.hide-on-mobile {
-  display: block;
-
-  @media (max-width: 768px) {
-    display: none;
+// Mixins for responsive design
+@mixin mobile-only {
+  @media (max-width: #{$breakpoint-md - 1px}) {
+    @content;
   }
 }
 
-.full-width {
-  width: 100%;
+@mixin tablet-up {
+  @media (min-width: #{$breakpoint-md}) {
+    @content;
+  }
 }
 
-.responsive-img {
-  max-width: 100%;
-  height: auto;
+@mixin desktop-up {
+  @media (min-width: #{$breakpoint-lg}) {
+    @content;
+  }
+}
+
+@mixin large-desktop-up {
+  @media (min-width: #{$breakpoint-xl}) {
+    @content;
+  }
+}
+
+// Base responsive styles
+.container {
+  width: 100%;
+  padding: 0 1rem;
+  margin: 0 auto;
+
+  @include tablet-up {
+    padding: 0 2rem;
+    max-width: 1200px;
+  }
+}
+
+// Mobile-first typography
+h1 {
+  font-size: 2rem;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+
+  @include tablet-up {
+    font-size: 3rem;
+  }
+
+  @include desktop-up {
+    font-size: 4rem;
+  }
+}
+
+h2 {
+  font-size: 1.5rem;
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+
+  @include tablet-up {
+    font-size: 2rem;
+  }
+
+  @include desktop-up {
+    font-size: 2.5rem;
+  }
+}
+
+h3 {
+  font-size: 1.25rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+
+  @include tablet-up {
+    font-size: 1.5rem;
+  }
+}
+
+p {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+
+  @include tablet-up {
+    font-size: 1.125rem;
+  }
+}
+
+// Mobile-first grid system
+.grid {
+  display: grid;
+  gap: 1rem;
+  
+  &.cols-1 {
+    grid-template-columns: 1fr;
+  }
+
+  &.cols-2 {
+    grid-template-columns: 1fr;
+    
+    @include tablet-up {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  &.cols-3 {
+    grid-template-columns: 1fr;
+    
+    @include tablet-up {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @include desktop-up {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  &.cols-4 {
+    grid-template-columns: 1fr;
+    
+    @include tablet-up {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @include desktop-up {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+}
+
+// Responsive utilities
+.hide-mobile {
+  @include mobile-only {
+    display: none !important;
+  }
+}
+
+.hide-tablet {
+  @include tablet-up {
+    display: none !important;
+  }
+}
+
+.show-mobile {
+  display: block;
+  
+  @include tablet-up {
+    display: none !important;
+  }
+}
+
+.show-tablet {
+  display: none;
+  
+  @include tablet-up {
+    display: block !important;
+  }
+}
+
+// Touch-friendly button sizes for mobile
+@include mobile-only {
+  .btn {
+    min-height: 44px;
+    padding: 12px 24px;
+    font-size: 16px; // Prevents zoom on iOS
+  }
+  
+  .nav-link,
+  .mobile-nav-link {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
 }

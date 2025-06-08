@@ -1,154 +1,162 @@
-import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import { jwtDecode } from "jwt-decode";
-import axios from "../api/axios";
 
 const Navbar = () => {
-  const navigate = useNavigate();
-  const [progress, setProgress] = useState(null);
-  const { token, user, isAuthenticated, logout } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  // Close mobile menu when route changes (for regular HTML)
+  // Remove this useEffect if not using React Router
+  // useEffect(() => {
+  //   setIsMobileMenuOpen(false);
+  // }, [location]);
 
-  let displayName = "User";
-  if (token) {
-    try {
-      const decoded = jwtDecode(token);
-      displayName = decoded.full_name || decoded.email || "User";
-    } catch {
-      logout();
-      navigate("/login");
-    }
-  }
-
+  // Close mobile menu on window resize (desktop)
   useEffect(() => {
-    const fetchOnboarding = async () => {
-      if (token && user?.sub) {
-        try {
-          const res = await axios.get("/developer/me", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const onboarding = res.data?.onboarding || {};
-          const steps = Object.values(onboarding);
-          const completed = steps.filter(Boolean).length;
-          setProgress({ completed, total: steps.length });
-        } catch {
-          setProgress(null);
-        }
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
       }
     };
-    fetchOnboarding();
-  }, [token, user]);
 
-  const progressPercent = progress
-    ? Math.round((progress.completed / progress.total) * 100)
-    : 0;
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Handle escape key to close menu
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isMobileMenuOpen]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.classList.add("mobile-menu-open");
+    } else {
+      document.body.classList.remove("mobile-menu-open");
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove("mobile-menu-open");
+    };
+  }, [isMobileMenuOpen]);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  // For regular HTML navigation without React Router
+  const isActiveRoute = (path) => {
+    return window.location.pathname === path;
+  };
+
+  const handleMobileMenuClick = (e) => {
+    // Close menu if clicking the overlay (not the menu content)
+    if (e.target === e.currentTarget) {
+      closeMobileMenu();
+    }
+  };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-      <Link className="navbar-brand" to="/">
-        AutoAgent
-      </Link>
+    <nav className="navbar">
+      <div className="navbar-container">
+        {/* Brand/Logo */}
+        <a href="/" className="navbar-brand">
+          AutoAgent
+        </a>
 
-      {/* Hamburger toggler for mobile */}
-      <button
-        className="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span className="navbar-toggler-icon"></span>
-      </button>
-
-      <div className="collapse navbar-collapse" id="navbarNav">
-        <ul className="navbar-nav ms-auto align-items-center">
+        {/* Desktop Navigation */}
+        <ul className="navbar-nav">
           <li className="nav-item">
-            <Link className="nav-link" to="/welcome">
+            <a
+              href="/"
+              className={`nav-link ${isActiveRoute("/") ? "active" : ""}`}
+            >
               Welcome
-            </Link>
+            </a>
           </li>
+          <li className="nav-item">
+            <a
+              href="/login"
+              className={`nav-link ${isActiveRoute("/login") ? "active" : ""}`}
+            >
+              Login
+            </a>
+          </li>
+          <li className="nav-item">
+            <a
+              href="/register"
+              className={`nav-link ${
+                isActiveRoute("/register") ? "active" : ""
+              }`}
+            >
+              Register
+            </a>
+          </li>
+        </ul>
 
-          {isAuthenticated ? (
-            <>
-              <li className="nav-item">
-                <Link className="nav-link" to="/dashboard">
-                  Dashboard
-                </Link>
-              </li>
+        {/* Hamburger Menu Button */}
+        <button
+          className={`hamburger-menu ${isMobileMenuOpen ? "active" : ""}`}
+          onClick={toggleMobileMenu}
+          aria-label="Toggle navigation"
+          aria-expanded={isMobileMenuOpen}
+        >
+          <span className="hamburger-line"></span>
+          <span className="hamburger-line"></span>
+          <span className="hamburger-line"></span>
+        </button>
+      </div>
 
-              {progress && (
-                <li className="nav-item d-flex align-items-center px-2">
-                  <div className="text-light small text-nowrap me-2">
-                    {progress.completed}/{progress.total}
-                  </div>
-                  <div
-                    className="progress"
-                    style={{ width: "80px", height: "6px" }}
-                  >
-                    <div
-                      className="progress-bar bg-success"
-                      role="progressbar"
-                      style={{ width: `${progressPercent}%` }}
-                      aria-valuenow={progressPercent}
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                    />
-                  </div>
-                </li>
-              )}
-
-              <li className="nav-item dropdown">
-                <button
-                  className="btn nav-link dropdown-toggle"
-                  id="userDropdown"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  Hello, {displayName}
-                </button>
-                <ul
-                  className="dropdown-menu dropdown-menu-end"
-                  aria-labelledby="userDropdown"
-                >
-                  <li>
-                    <Link className="dropdown-item" to="/profile">
-                      Profile
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" to="/onboarding">
-                      Onboarding
-                    </Link>
-                  </li>
-                  <li>
-                    <button className="dropdown-item" onClick={handleLogout}>
-                      Logout
-                    </button>
-                  </li>
-                </ul>
-              </li>
-            </>
-          ) : (
-            <>
-              <li className="nav-item">
-                <Link className="nav-link" to="/login">
-                  Login
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/register-user">
-                  Register
-                </Link>
-              </li>
-            </>
-          )}
+      {/* Mobile Menu Overlay */}
+      <div
+        className={`mobile-menu ${isMobileMenuOpen ? "active" : ""}`}
+        onClick={handleMobileMenuClick}
+      >
+        <ul className="mobile-nav">
+          <li className="mobile-nav-item">
+            <a
+              href="/"
+              className={`mobile-nav-link ${
+                isActiveRoute("/") ? "active" : ""
+              }`}
+              onClick={closeMobileMenu}
+            >
+              Welcome
+            </a>
+          </li>
+          <li className="mobile-nav-item">
+            <a
+              href="/login"
+              className={`mobile-nav-link ${
+                isActiveRoute("/login") ? "active" : ""
+              }`}
+              onClick={closeMobileMenu}
+            >
+              Login
+            </a>
+          </li>
+          <li className="mobile-nav-item">
+            <a
+              href="/register"
+              className={`mobile-nav-link ${
+                isActiveRoute("/register") ? "active" : ""
+              }`}
+              onClick={closeMobileMenu}
+            >
+              Register
+            </a>
+          </li>
         </ul>
       </div>
     </nav>
