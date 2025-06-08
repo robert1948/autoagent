@@ -32,15 +32,78 @@ $breakpoint-xl: 1200px;
 }
 
 // Base responsive styles
-.container {
+.container,
+.navbar,
+.navbar-container,
+.mobile-menu {
   width: 100%;
-  padding: 0 1rem;
+  box-sizing: border-box;
   margin: 0 auto;
+}
+
+.container {
+  padding: 0 1rem;
 
   @include tablet-up {
     padding: 0 2rem;
     max-width: 1200px;
   }
+}
+
+// Hamburger menu styles
+.hamburger-menu {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0.5rem;
+  z-index: 1001;
+
+  .hamburger-line {
+    width: 28px;
+    height: 3px;
+    background: #ff5722;
+    border-radius: 2px;
+    display: block;
+    transition: all 0.3s;
+  }
+}
+
+// Mobile menu overlay
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #23272f;
+  z-index: 1000;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+  padding-top: 60px;
+}
+
+.mobile-menu.active {
+  display: flex;
+}
+
+.mobile-nav {
+  width: 100%;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1.5rem;
+}
+
+.mobile-nav-link {
+  color: #ff5722;
+  font-size: 1.25rem;
+  text-decoration: none;
 }
 
 // Mobile-first typography
@@ -176,5 +239,28 @@ p {
     min-height: 44px;
     display: flex;
     align-items: center;
+  }
+}
+
+// Responsive navbar visibility
+@media (max-width: #{$breakpoint-md - 1px}) {
+  .navbar-nav {
+    display: none !important;
+  }
+  .hamburger-menu {
+    display: flex !important;
+  }
+}
+
+@media (min-width: #{$breakpoint-md}) {
+  .mobile-menu,
+  .mobile-menu.active {
+    display: none !important;
+  }
+  .hamburger-menu {
+    display: none !important;
+  }
+  .navbar-nav {
+    display: flex !important;
   }
 }
