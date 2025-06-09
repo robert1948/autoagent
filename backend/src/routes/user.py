@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 
-from src.database import SessionLocal
-from src.models import User
-from src.schemas.user import UserRegisterRequest, SuccessMessage
-from src.utils import hash_password
+from database import SessionLocal
+from models import User
+from schemas.user import UserRegisterRequest, SuccessMessage
+from utils import hash_password
 
 router = APIRouter()
 
@@ -32,7 +32,7 @@ def register_user(payload: UserRegisterRequest, db: Session = Depends(get_db)):
     new_user = User(
         full_name=payload.full_name,
         email=payload.email,
-        hashed_password=hash_password(payload.password)
+        password=hash_password(payload.password)  # ✅ Field name fix
     )
 
     db.add(new_user)

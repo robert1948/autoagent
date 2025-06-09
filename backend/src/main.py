@@ -4,8 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
-from src.config.settings import settings
-from src.router import router as api_router
+from config.settings import settings
+from router import router as api_router
 
 app = FastAPI()
 
@@ -35,7 +35,7 @@ async def serve_react_app(request: Request, full_path: str):
         return FileResponse(index_file)
     return HTMLResponse(status_code=404, content="React frontend not found.")
 
-# === TEST route: Display environment variables (be careful not to expose secrets!) ===
+# === TEST route: Display environment variables (safe for dev only) ===
 
 
 @app.get("/env-check")
@@ -45,6 +45,6 @@ async def env_check():
         "FRONTEND_ORIGIN": settings.FRONTEND_ORIGIN,
         "ACCESS_TOKEN_EXPIRE_MINUTES": settings.ACCESS_TOKEN_EXPIRE_MINUTES,
         "ALGORITHM": settings.ALGORITHM,
-        # Do not expose SECRET_KEY or sensitive values here.
+        # Do not expose SECRET_KEY or other sensitive values here.
     }
     return JSONResponse(content=env_data)

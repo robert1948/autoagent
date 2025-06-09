@@ -1,8 +1,8 @@
-# backend/src/routes/__init__.py
-
 from fastapi import APIRouter
-from src.routes.developer import router as developer_router
-from src.routes.user import router as user_router
+
+# Updated absolute imports without 'src.'
+from routes.developer import router as developer_router
+from routes.user import router as user_router
 
 router = APIRouter()
 

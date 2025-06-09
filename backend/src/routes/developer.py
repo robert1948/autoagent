@@ -1,17 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from src.database import SessionLocal
-from src.models import Developer
-from src.schemas.developer import (
+from database import SessionLocal
+from models import Developer
+from schemas.developer import (
     DeveloperRegisterRequest,
     DeveloperProfile,
     DeveloperLoginRequest,
     OnboardingUpdateRequest  # ✅ Correct and single import
 )
-from src.schemas.user import SuccessMessage, Token
-from src.utils import hash_password, verify_password, create_access_token
-from src.dependencies.auth_guard import get_current_developer
+from schemas.user import SuccessMessage, Token
+from utils import hash_password, verify_password, create_access_token
+from dependencies.auth_guard import get_current_developer
 
 router = APIRouter()
 

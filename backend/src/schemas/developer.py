@@ -19,6 +19,13 @@ class OnboardingUpdateRequest(BaseModel):
     onboarding: Dict[str, bool]
 
 
+class OnboardingState(BaseModel):
+    upload_portfolio: bool 
+    complete_profile: bool 
+    connect_github: bool 
+    start_agent_task: bool 
+
+
 class DeveloperProfile(BaseModel):
     id: int
     full_name: str
@@ -29,4 +36,4 @@ class DeveloperProfile(BaseModel):
     onboarding: Optional[Dict[str, bool]] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # Updated for Pydantic V2
